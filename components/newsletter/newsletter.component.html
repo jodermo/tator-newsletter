@@ -1,0 +1,76 @@
+<div class="horizontal-flex">
+  <div class="article full flex-item">
+    <div class="article-title">
+      <span>{{app.text('newsletters', type)}}</span>
+      <div class="horizontal-flex flex-item flex-end">
+        <button class="new-button"></button>
+      </div>
+    </div>
+    <div class="article-content">
+      <app-mail-template-sender [type]="type" [emailTemplate]="app.mail.currentTemplate"></app-mail-template-sender>
+    </div>
+  </div>
+  <div class="article full flex-item">
+    <div class="article-title">
+      <span>{{app.text('templates', 'default')}}</span>
+      <div class="horizontal-flex flex-item flex-end">
+        <button class="new-button" (click)="app.mail.newTemplate(type); editTemplate = true; htmlChanged = false;"></button>
+      </div>
+    </div>
+    <div class="article-content">
+      <app-mail-template-list [type]="type" (onEntryClick)="app.mail.currentTemplate = $event; htmlChanged = false; getContext()"
+                              (onEntryEdit)="app.mail.currentTemplate = $event; editTemplate = true; htmlChanged = false; getContext()"></app-mail-template-list>
+    </div>
+  </div>
+</div>
+<div class="horizontal-flex">
+  <div class="article full flex-item">
+    <div class="article-title">
+      <span>{{app.text('preview', type)}}</span>
+    </div>
+    <div class="article-content" *ngIf="context">
+      <app-code-preview *ngIf="app.mail.currentTemplate && !app.mail.loading"
+                        [code]="app.mail.currentTemplate.html"
+                        [data]="context"
+      ></app-code-preview>
+    </div>
+  </div>
+  <div class="article full flex-item">
+    <div class="article-title">
+      <span>{{app.text('template', type)}}</span>
+    </div>
+    <div class="article-content">
+      <app-code-editor
+        *ngIf="app.mail.currentTemplate"
+        [code]="app.mail.currentTemplate.html"
+        [data]="app.mail.currentTemplate.context"
+        (onChange)="setTemplateHtml($event)"></app-code-editor>
+    </div>
+    <div class="article-footer">
+      <button class="save-button" [ngClass]="{inactive:(!htmlChanged)}"
+              (click)="app.mail.saveTemplate(); htmlChanged = false;">{{app.text('save', 'backend')}}</button>
+    </div>
+  </div>
+</div>
+<div class="popup-overlay layout-{{app.popupLayout}}"
+     [ngClass]="{active:(editTemplate && app.mail.currentTemplate && app.mail.currentTemplate.type === type)}">
+  <div class="popup-container"
+       *ngIf="(editTemplate && app.mail.currentTemplate && app.mail.currentTemplate.type ===type)">
+    <div class="popup-header">
+      <h3>{{app.text('template', type)}}</h3>
+      <app-popup-options></app-popup-options>
+      <button class="close-button" (click)="editTemplate = false"></button>
+    </div>
+    <div class="popup-content">
+      <app-data-editor [data]="app.mail.currentTemplate"
+                       (onDataUpdate)="app.mail.currentTemplate = $event"></app-data-editor>
+    </div>
+    <div class="popup-footer">
+      <button class="save-button"
+              (click)="app.mail.saveTemplate(); app.mail.currentTemplate = null;"
+              [ngClass]="{inactive:(app.restaurant.updating)}">{{app.text('save', 'backend')}}
+      </button>
+    </div>
+  </div>
+</div>
+
